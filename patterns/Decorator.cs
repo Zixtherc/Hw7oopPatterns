@@ -1,57 +1,89 @@
 ﻿using System;
+using System.Text;
 
-namespace FactoryMethodExample
+namespace DecoratorExample
 {
-    // Абстрактний клас творця, який має абстрактний метод FactoryMethod, що приймає тип продукта
-    public abstract class Creator
+    abstract class Tree
     {
-        public abstract Product FactoryMethod(int type);
+        public abstract void Display();
     }
 
-    public class ConcreteCreator : Creator
+    class ChristmasTree : Tree
     {
-        public override Product FactoryMethod(int type)
+        public override void Display()
         {
-            switch (type)
+            Console.WriteLine("A regular green Christmas tree.");
+        }
+    }
+
+    abstract class TreeDecorator : Tree
+    {
+        protected Tree tree;
+
+        public TreeDecorator(Tree tree)
+        {
+            this.tree = tree;
+        }
+
+        public override void Display()
+        {
+            if (tree != null)
             {
-                // повертає об'єкт A, якщо type==1
-                case 1: return new ConcreteProductA();
-                // повертає об'єкт B, якщо type==2  
-                case 2: return new ConcreteProductB();
-                // ============================================================
-
-                // повертає об'єкт C, якщо type==3 
-                case 3: return new ConcreteProductC();
-
-                // ============================================================
-                default: throw new ArgumentException("Invalid type.", "type");
+                tree.Display();
             }
         }
     }
 
-    public abstract class Product { } // Абстрактний клас продукт
-
-    // Конкретні продукти з різною реалізацією
-    public class ConcreteProductA : Product { }
-
-    public class ConcreteProductB : Product { }
-
-    // ============================================================
-
-    public class ConcreteProductC : Product { }
-
-    // ============================================================
-
-    class MainApp
+    class OrnamentsDecorator : TreeDecorator
     {
-        static void Main()
+        public string Ornaments { get; set; }
+
+        public OrnamentsDecorator(Tree tree, string ornaments) : base(tree)
         {
-            Creator creator = new ConcreteCreator();
-            for (int i = 1; i <= 3; i++)
-            {
-                var product = creator.FactoryMethod(i);
-                Console.WriteLine("Where id = {0}, Created {1} ", i, product.GetType());
-            }
+            Ornaments = ornaments;
+        }
+
+        public override void Display()
+        {
+            base.Display();
+            Console.WriteLine($" - Decorated with toys: {Ornaments}.");
+        }
+    }
+
+    class GarlandDecorator : TreeDecorator
+    {
+        public GarlandDecorator(Tree tree) : base(tree) { }
+
+        public override void Display()
+        {
+            base.Display();
+            Glow();
+        }
+
+        public void Glow()
+        {
+            Console.WriteLine(" - The string of lights is on the Christmas tree: The Christmas tree is glowing brightly!");
+        }
+    }
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.OutputEncoding = Encoding.UTF8;
+
+            Console.WriteLine("1. Basic Christmas tree:");
+            Tree myTree = new ChristmasTree();
+            myTree.Display();
+
+            Console.WriteLine("\n2. A Christmas tree with decorations:");
+            Tree treeWithOrnaments = new OrnamentsDecorator(myTree, "red balls, pinecones, a star");
+            treeWithOrnaments.Display();
+
+            Console.WriteLine("\n3. A Christmas tree with ornaments and a string of lights:");
+            Tree fullyDecoratedTree = new GarlandDecorator(treeWithOrnaments);
+            fullyDecoratedTree.Display();
+
             Console.ReadKey();
         }
     }
